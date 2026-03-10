@@ -179,6 +179,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_create_student: {
+        Args: {
+          student_email: string
+          student_name: string
+          student_phone: string
+        }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -320,3 +328,4 @@ export const Constants = {
     },
   },
 } as const
+

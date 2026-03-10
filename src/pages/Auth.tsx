@@ -4,9 +4,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Shield, QrCode } from "lucide-react";
+import { MapPin, Shield, QrCode, User, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Auth() {
@@ -60,51 +60,67 @@ export default function Auth() {
         <div className="flex justify-center gap-6 text-muted-foreground text-sm">
           <span className="flex items-center gap-1"><MapPin className="h-4 w-4 text-primary" /> GPS Verified</span>
           <span className="flex items-center gap-1"><Shield className="h-4 w-4 text-primary" /> WiFi Checked</span>
-          <span className="flex items-center gap-1"><QrCode className="h-4 w-4 text-primary" /> Dynamic QR</span>
         </div>
 
-        <Card className="glass-card">
-          <Tabs defaultValue="login">
+        <Card className="glass-card mt-8">
+          <Tabs defaultValue="student">
             <CardHeader className="pb-2">
-              <TabsList className="w-full">
-                <TabsTrigger value="login" className="flex-1">Sign In</TabsTrigger>
-                <TabsTrigger value="signup" className="flex-1">Sign Up</TabsTrigger>
+              <TabsList className="w-full grid border-b border-border/40 grid-cols-2 bg-transparent p-0 gap-4 mb-4">
+                <TabsTrigger 
+                  value="student" 
+                  className="rounded-t-lg rounded-b-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-card data-[state=active]:shadow-none data-[state=active]:text-primary flex items-center gap-2 py-3"
+                >
+                  <User className="h-4 w-4" />
+                  Student Login
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="admin" 
+                  className="rounded-t-lg rounded-b-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-card data-[state=active]:shadow-none data-[state=active]:text-primary flex items-center gap-2 py-3"
+                >
+                  <ShieldCheck className="h-4 w-4" />
+                  Admin Login
+                </TabsTrigger>
               </TabsList>
             </CardHeader>
             <CardContent>
-              <TabsContent value="login">
+              <TabsContent value="student" className="mt-0 space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                <CardTitle className="text-xl mb-6">Student Portal</CardTitle>
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
-                    <Input id="login-email" type="email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required placeholder="you@example.com" />
+                    <Label htmlFor="student-login-email">Email</Label>
+                    <Input id="student-login-email" type="email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required placeholder="student@example.com" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="login-password">Password</Label>
-                    <Input id="login-password" type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required placeholder="••••••••" />
+                    <Label htmlFor="student-login-password">Password</Label>
+                    <Input id="student-login-password" type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required placeholder="••••••••" />
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Signing in..." : "Sign In"}
+                  <Button type="submit" className="w-full py-6 text-lg" disabled={loading}>
+                    {loading ? "Signing in..." : "Login as Student"}
                   </Button>
                 </form>
               </TabsContent>
-              <TabsContent value="signup">
-                <form onSubmit={handleSignup} className="space-y-4">
+
+              <TabsContent value="admin" className="mt-0 space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                <CardTitle className="text-xl mb-6 flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-primary" /> 
+                  Admin Portal
+                </CardTitle>
+                <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Full Name</Label>
-                    <Input id="signup-name" value={signupName} onChange={(e) => setSignupName(e.target.value)} required placeholder="John Doe" />
+                    <Label htmlFor="admin-login-email">Admin Email</Label>
+                    <Input id="admin-login-email" type="email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required placeholder="admin@example.com" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
-                    <Input id="signup-email" type="email" value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} required placeholder="you@example.com" />
+                    <Label htmlFor="admin-login-password">Password</Label>
+                    <Input id="admin-login-password" type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required placeholder="••••••••" />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
-                    <Input id="signup-password" type="password" value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} required minLength={6} placeholder="••••••••" />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Creating account..." : "Create Account"}
+                  <Button type="submit" variant="default" className="w-full py-6 text-lg bg-primary/90 hover:bg-primary" disabled={loading}>
+                    {loading ? "Signing in..." : "Login as Admin"}
                   </Button>
                 </form>
+                <p className="text-xs text-muted-foreground text-center mt-6">
+                  Only authorized admin accounts can access the dashboard.
+                </p>
               </TabsContent>
             </CardContent>
           </Tabs>
