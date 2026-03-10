@@ -85,13 +85,14 @@ export default function AttendanceReports() {
 
   const filteredRecords = useMemo(() => {
     return records.filter(r => {
-      const recordDate = parseISO(r.recorded_at);
+      // Use the pre-computed attendance_date from the DB (YYYY-MM-DD) for clean filtering
+      const recordDate = r.attendance_date;
       let isValid = true;
       if (startDate) {
-        isValid = isValid && recordDate >= startOfDay(parseISO(startDate));
+        isValid = isValid && recordDate >= startDate;
       }
       if (endDate) {
-        isValid = isValid && recordDate <= endOfDay(parseISO(endDate));
+        isValid = isValid && recordDate <= endDate;
       }
       return isValid;
     });

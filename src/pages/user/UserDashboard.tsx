@@ -142,8 +142,8 @@ export default function UserDashboard() {
         throw new Error(`WiFi verification failed. Expected network IP: ${org.allowed_ip}, your IP: ${userIp}`);
       }
 
-      // Check duplicate attendance
-      const today = new Date().toISOString().split("T")[0];
+      // Check duplicate attendance using local date
+      const today = format(new Date(), "yyyy-MM-dd");
       const { data: existing } = await supabase
         .from("attendance")
         .select("id")
