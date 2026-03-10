@@ -5,7 +5,8 @@ import AppLayout from "@/components/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { QRCodeSVG } from "qrcode.react";
-import { QrCode, RefreshCw, Timer } from "lucide-react";
+import { QrCode, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Org {
   id: string;
@@ -17,7 +18,6 @@ export default function QRGenerator() {
   const [orgs, setOrgs] = useState<Org[]>([]);
   const [selectedOrg, setSelectedOrg] = useState<string>("");
   const [qrData, setQrData] = useState<string>("");
-  const [countdown, setCountdown] = useState(30);
   const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
@@ -36,7 +36,8 @@ export default function QRGenerator() {
     setGenerating(true);
     
     const token = crypto.randomUUID() + "-" + Date.now();
-    const expiresAt = new Date(Date.now() + 30000).toISOString();
+    // Expiration set to 24 hours (86400000 ms) instead of 30 seconds
+    const expiresAt = new Date(Date.now() + 86400000).toISOString();
 
     const { error } = await supabase.from("qr_tokens").insert({
       org_id: selectedOrg,
@@ -46,34 +47,25 @@ export default function QRGenerator() {
 
     if (!error) {
       setQrData(JSON.stringify({ token, org_id: selectedOrg }));
-      setCountdown(30);
     }
     setGenerating(false);
   }, [selectedOrg]);
 
-  // Auto-refresh every 30 seconds
+  // Initial generation when an organization is selected
   useEffect(() => {
-    if (!selectedOrg) return;
+    if (!selectedOrg) {
+      setQrData("");
+      return;
+    }
     generateToken();
-    const interval = setInterval(generateToken, 30000);
-    return () => clearInterval(interval);
   }, [selectedOrg, generateToken]);
-
-  // Countdown timer
-  useEffect(() => {
-    if (!qrData) return;
-    const timer = setInterval(() => {
-      setCountdown((prev) => (prev <= 1 ? 30 : prev - 1));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [qrData]);
 
   return (
     <AppLayout>
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-heading font-bold text-foreground">QR Code Generator</h1>
-          <p className="text-muted-foreground">Generate dynamic QR codes that refresh every 30 seconds</p>
+          <p className="text-muted-foreground">Generate static QR codes for attendance tracking</p>
         </div>
 
         <Card className="glass-card">
@@ -108,19 +100,19 @@ export default function QRGenerator() {
                 />
               </div>
 
-              <div className="flex items-center gap-4 text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <Timer className="h-4 w-4 text-primary" />
-                  <span className="font-heading font-bold text-2xl text-foreground">{countdown}s</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <RefreshCw className={`h-4 w-4 ${generating ? "animate-spin" : ""} text-primary`} />
-                  <span className="text-sm">Auto-refresh</span>
-                </div>
+              <div className="flex flex-col items-center gap-4 text-muted-foreground mt-4">
+                <Button 
+                  onClick={generateToken} 
+                  disabled={generating}
+                  className="gap-2"
+                >
+                  <RefreshCw className={`h-4 w-4 ${generating ? "animate-spin" : ""}`} />
+                  Generate New QR
+                </Button>
               </div>
 
-              <p className="text-sm text-muted-foreground text-center max-w-xs">
-                Display this QR code for users to scan. It refreshes automatically to prevent screenshot sharing.
+              <p className="text-sm text-muted-foreground text-center max-w-xs mt-4">
+                Display this QR code for users to scan. Click "Generate New QR" to invalidate the current code and create a new one.
               </p>
             </CardContent>
           </Card>
