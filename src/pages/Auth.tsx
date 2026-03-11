@@ -46,23 +46,23 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md space-y-8">
+    <div className="relative min-h-screen flex items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-8 relative z-10">
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-2 gradient-primary text-primary-foreground px-4 py-2 rounded-full font-heading font-bold text-lg">
+          <div className="inline-flex items-center gap-2 gradient-primary text-primary-foreground px-4 py-2 rounded-full font-heading font-bold text-lg shadow-lg">
             <QrCode className="h-5 w-5" />
             GeoQR
           </div>
-          <h1 className="text-3xl font-heading font-bold text-foreground">Welcome Back</h1>
-          <p className="text-muted-foreground">Secure attendance with location verification</p>
+          <h1 className="text-3xl font-heading font-bold text-white drop-shadow-md">Welcome Back</h1>
+          <p className="text-slate-300 drop-shadow-sm">Secure attendance with location verification</p>
         </div>
 
-        <div className="flex justify-center gap-6 text-muted-foreground text-sm">
+        <div className="flex justify-center gap-6 text-slate-300 text-sm drop-shadow-sm">
           <span className="flex items-center gap-1"><MapPin className="h-4 w-4 text-primary" /> GPS Verified</span>
           <span className="flex items-center gap-1"><Shield className="h-4 w-4 text-primary" /> WiFi Checked</span>
         </div>
 
-        <Card className="glass-card mt-8">
+        <Card className="auth-glass-card mt-8 border-white/10">
           <Tabs defaultValue="student">
             <CardHeader className="pb-2">
               <TabsList className="w-full grid border-b border-border/40 grid-cols-2 bg-transparent p-0 gap-4 mb-4">

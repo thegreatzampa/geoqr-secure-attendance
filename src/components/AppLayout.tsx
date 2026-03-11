@@ -2,7 +2,6 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { QrCode, LayoutDashboard, Settings, History, LogOut, ScanLine, Users, UserPlus } from "lucide-react";
-import { ModeToggle } from "@/components/mode-toggle";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,8 +57,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card/80 backdrop-blur-lg sticky top-0 z-50">
+    <div className="min-h-screen relative">
+      <header className="border-b border-white/10 bg-[#0a0f1c]/40 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <div className="gradient-primary text-primary-foreground p-2 rounded-lg">
@@ -84,7 +83,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </nav>
 
           <div className="flex items-center gap-2">
-            <ModeToggle />
             {isAdmin && (
               <Dialog>
                 <DialogTrigger asChild>
@@ -116,7 +114,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </header>
 
     {/* Mobile nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-lg">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#0a0f1c]/40 backdrop-blur-xl">
         <div className="flex justify-center gap-8 py-2">
           {navItems.map((item) => (
             <Link key={item.to} to={item.to} className="flex flex-col items-center gap-1 px-3 py-1">
