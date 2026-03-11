@@ -52,9 +52,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         { to: "/admin/students", icon: UserPlus, label: "Add Student" },
         { to: "/admin/reports", icon: Users, label: "Reports" },
       ]
-    : [
-        { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-      ];
+    : [];
 
   return (
     <div className="min-h-screen relative">
@@ -114,8 +112,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </header>
 
     {/* Mobile nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#0a0f1c]/40 backdrop-blur-xl">
-        <div className="flex justify-center gap-8 py-2">
+      {(navItems.length > 0 || isAdmin) && (
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#0a0f1c]/40 backdrop-blur-xl">
+          <div className="flex justify-center gap-8 py-2">
           {navItems.map((item) => (
             <Link key={item.to} to={item.to} className="flex flex-col items-center gap-1 px-3 py-1">
               <item.icon className={`h-5 w-5 ${location.pathname === item.to ? "text-primary" : "text-muted-foreground"}`} />
@@ -147,8 +146,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </DialogContent>
             </Dialog>
           )}
-        </div>
-      </nav>
+          </div>
+        </nav>
+      )}
 
       <main className="container mx-auto px-4 py-6 pb-24 md:pb-6">{children}</main>
     </div>

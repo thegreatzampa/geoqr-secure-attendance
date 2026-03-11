@@ -71,7 +71,7 @@ export default function AttendanceReports() {
     const fetchRecords = async () => {
       // Trying to fetch user profile names if available (assuming generic profiles table might exist or just show ID)
       const { data } = await supabase.from("attendance")
-        .select("*, profiles:user_id(full_name)")
+        .select("*, profiles!fk_attendance_profiles(full_name, email)")
         .eq("org_id", selectedOrg)
         .order("recorded_at", { ascending: false })
         .limit(500);
@@ -85,7 +85,7 @@ export default function AttendanceReports() {
 
   const filteredRecords = useMemo(() => {
     return records.filter(r => {
-      // Use the pre-computed attendance_date from the DB (YYYY-MM-DD) for clean filtering
+      // Use the strict YYYY-MM-DD format extracted from the timezone-locked database values
       const recordDate = r.attendance_date;
       let isValid = true;
       if (startDate) {
@@ -113,15 +113,16 @@ export default function AttendanceReports() {
       doc.text(`Date Range: ${startDate} to ${endDate}`, 14, 36);
     }
 
-    const tableColumn = ["Date", "Time", "User", "Status", "IP Address"];
+    const tableColumn = ["Date", "Time", "Student Name", "Status"];
     const tableRows: any[] = [];
 
     filteredRecords.forEach(r => {
       const date = format(parseISO(r.recorded_at), "MMM dd, yyyy");
       const time = format(parseISO(r.recorded_at), "HH:mm:ss");
-      const userStr = (r as any).profiles?.full_name || r.user_id.slice(0, 8);
+      const profile = (r as any).profiles;
+      const userStr = (profile?.full_name?.trim() ? profile.full_name : profile?.email) || r.user_id.slice(0, 8);
       
-      tableRows.push([date, time, userStr, r.status, r.ip_address || "N/A"]);
+      tableRows.push([date, time, userStr, r.status]);
     });
 
     autoTable(doc, {
@@ -206,9 +207,8 @@ export default function AttendanceReports() {
                     <TableRow>
                       <TableHead>Date</TableHead>
                       <TableHead>Time</TableHead>
-                      <TableHead>User / Student</TableHead>
+                      <TableHead>Student Name</TableHead>
                       <TableHead className="hidden md:table-cell">GPS Map</TableHead>
-                      <TableHead className="hidden sm:table-cell">IP</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -217,7 +217,9 @@ export default function AttendanceReports() {
                       <TableRow key={r.id}>
                         <TableCell className="font-medium">{format(new Date(r.recorded_at), "MMM dd, yyyy")}</TableCell>
                         <TableCell>{format(new Date(r.recorded_at), "HH:mm:ss")}</TableCell>
-                        <TableCell className="font-mono text-xs sm:text-sm">{(r as any).profiles?.full_name || r.user_id.slice(0, 8) + "..."}</TableCell>
+                        <TableCell className="font-medium text-sm">
+                          {((r as any).profiles?.full_name?.trim() ? (r as any).profiles.full_name : (r as any).profiles?.email) || r.user_id.slice(0, 8) + "..."}
+                        </TableCell>
                         <TableCell className="text-xs hidden md:table-cell">
                           <a 
                             href={`https://www.google.com/maps/search/?api=1&query=${r.latitude},${r.longitude}`}
@@ -228,7 +230,6 @@ export default function AttendanceReports() {
                             <Search className="h-3 w-3" /> View Map
                           </a>
                         </TableCell>
-                        <TableCell className="text-xs hidden sm:table-cell">{r.ip_address || "N/A"}</TableCell>
                         <TableCell>
                           <Badge variant="secondary" className="bg-primary/20 text-primary border-none">{r.status}</Badge>
                         </TableCell>
