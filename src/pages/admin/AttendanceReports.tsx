@@ -119,7 +119,10 @@ export default function AttendanceReports() {
     filteredRecords.forEach(r => {
       const date = format(parseISO(r.recorded_at), "MMM dd, yyyy");
       const time = format(parseISO(r.recorded_at), "HH:mm:ss");
-      const profile = (r as any).profiles;
+      
+      let profile = (r as any).profiles;
+      if (Array.isArray(profile)) profile = profile[0];
+      
       const userStr = (profile?.full_name?.trim() ? profile.full_name : profile?.email) || r.user_id.slice(0, 8);
       
       tableRows.push([date, time, userStr, r.status]);
@@ -213,14 +216,19 @@ export default function AttendanceReports() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredRecords.map((r) => (
-                      <TableRow key={r.id}>
-                        <TableCell className="font-medium">{format(new Date(r.recorded_at), "MMM dd, yyyy")}</TableCell>
-                        <TableCell>{format(new Date(r.recorded_at), "HH:mm:ss")}</TableCell>
-                        <TableCell className="font-medium text-sm">
-                          {((r as any).profiles?.full_name?.trim() ? (r as any).profiles.full_name : (r as any).profiles?.email) || r.user_id.slice(0, 8) + "..."}
-                        </TableCell>
-                        <TableCell className="text-xs hidden md:table-cell">
+                    {filteredRecords.map((r) => {
+                      let profile = (r as any).profiles;
+                      if (Array.isArray(profile)) profile = profile[0];
+                      const displayName = (profile?.full_name?.trim() ? profile.full_name : profile?.email) || r.user_id.slice(0, 8) + "...";
+                      
+                      return (
+                        <TableRow key={r.id}>
+                          <TableCell className="font-medium">{format(new Date(r.recorded_at), "MMM dd, yyyy")}</TableCell>
+                          <TableCell>{format(new Date(r.recorded_at), "HH:mm:ss")}</TableCell>
+                          <TableCell className="font-medium text-sm">
+                            {displayName}
+                          </TableCell>
+                          <TableCell className="text-xs hidden md:table-cell">
                           <a 
                             href={`https://www.google.com/maps/search/?api=1&query=${r.latitude},${r.longitude}`}
                             target="_blank"
@@ -234,7 +242,7 @@ export default function AttendanceReports() {
                           <Badge variant="secondary" className="bg-primary/20 text-primary border-none">{r.status}</Badge>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    )})}
                   </TableBody>
                 </Table>
               </div>

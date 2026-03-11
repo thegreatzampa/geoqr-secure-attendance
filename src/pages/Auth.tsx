@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,9 +11,21 @@ import { MapPin, Shield, QrCode, User, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Auth() {
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, user, isAdmin, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("student");
+
+  // Only auto-redirect if they load the page already logged in
+  useEffect(() => {
+    if (user && !authLoading) {
+      if (isAdmin) {
+        navigate("/admin");
+      } else {
+        navigate("/dashboard");
+      }
+    }
+  }, [user, isAdmin, authLoading, navigate]);
 
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -23,13 +36,34 @@ export default function Auth() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signIn(loginEmail, loginPassword);
-    setLoading(false);
+    const { error, data } = await supabase.auth.signInWithPassword({
+      email: loginEmail,
+      password: loginPassword,
+    });
+    
     if (error) {
       toast.error(error.message);
-    } else {
+      setLoading(false);
+    } else if (data?.user) {
+      // Manually fetch roles to prevent race conditions and enforce tab strictness
+      const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id);
+      const isUserAdmin = roles?.some(r => r.role === "admin");
+
+      if (activeTab === "admin" && !isUserAdmin) {
+        await supabase.auth.signOut();
+        toast.error("Access Denied. This account is not an Administrator.");
+        setLoading(false);
+        return;
+      }
+      
       toast.success("Logged in successfully!");
-      navigate("/");
+      setLoading(false);
+
+      if (isUserAdmin) {
+        navigate("/admin");
+      } else {
+        navigate("/dashboard");
+      }
     }
   };
 
@@ -63,7 +97,7 @@ export default function Auth() {
         </div>
 
         <Card className="auth-glass-card mt-8 border-white/10">
-          <Tabs defaultValue="student">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
             <CardHeader className="pb-2">
               <TabsList className="w-full grid border-b border-border/40 grid-cols-2 bg-transparent p-0 gap-4 mb-4">
                 <TabsTrigger 
